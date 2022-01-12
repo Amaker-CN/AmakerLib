@@ -1,0 +1,25 @@
+{
+	"name": {
+		"zh-cn": "Arice智能小车",
+		"en": "AriceCar"
+	},
+	"description": {
+		"zh-cn": "迷你智能编程小车",
+		"en": "Mini Arduino Car"
+	},
+	"author": "Amaker",
+	"email": "16391459@qq.com",
+	"license": "Amaker",
+	"isBoard": false,
+	"id": "Arice",
+	"version": "0.0.1",
+	"platform": ["win", "mac", "web"],
+	"asset": {
+		"arduinoC": {
+			"dir": "arduinoC/",
+			"version": "0.0.1",
+			"board": ["arduino"],
+			"main": "main.ts"
+		}
+	}
+}
