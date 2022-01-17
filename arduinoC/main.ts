@@ -11,18 +11,43 @@ enum ACT {
     //% block="右转"
     5        
 }
-
 enum DIRS {
     //% block="前进"
     1,
     //% block="后退"
     2    
 }
+enum LINEBWL {
+    //% block="白色"
+    1,
+    //% block="黑色"
+    2    
+}
+enum LINELRL {
+    //% block="左"
+    9,
+    //% block="右"
+    10,
+    //% block="左和右"
+    3    
+}
+enum BUZT {
+    //% block="1/2"
+    500,
+    //% block="1/4"
+    250，    
+    //% block="1/8"
+    125,
+    //% block="整拍"
+    1000，   
+    //% block="双拍"
+    2000,
+    //% block="停止"
+    0   
+}
 
 //% color="#AA278D" iconWidth=50 iconHeight=40
 namespace Arice {
-    //% block="小车 [ACTION]" blockType="command"
-    //% ACTION.shadow="dropdown" ACTION.options="ACT" ACTION.defl="ACT.1"
     export function CarAction(parameter: any, block: any) {
         let action = parameter.ACTION.code;
         if(action==1)
@@ -139,5 +164,49 @@ namespace Arice {
           return (uint32_t)((((uint32_t)r<<16) | ((uint32_t)g<<8)) | (uint32_t)b);
         }`);
         Generator.addCode(`rgbToColor(${r},${g},${b})`);
-    }                        
+    }   
+    //% block="车载蜂鸣器音调为[TUNE]节拍为[BEAT]" blockType="command"
+    //% TUNE.shadow="note" TUNE.defl=247
+    //% BEAT.shadow="dropdown" BEAT.options="BUZT" BEAT.defl="BUZT.1"
+    export function Buzz(parameter: any, block: any) {
+        let tunev = parameter.TUNE.code;
+        let beatv = parameter.BEAT.code;
+        Generator.addInclude('DFRobot_Tone', '#include <DFRobot_Libraries.h>');
+        Generator.addObject(`DFRobot_Tone`, `DFRobot_Tone`, `DFTone;`);
+        Generator.addCode(`DFTone.play(8, ${tunev}, ${beatv});`);       
+    }
+    //% block="读取超声波传感器距离（厘米）" blockType="reporter"
+    export function sr04(parameter: any, block: any) {
+        Generator.addInclude('DFRobot_URM10', '#include <DFRobot_URM10.h>');
+        Generator.addObject(`DFRobot_URM10`, `DFRobot_URM10`, `urm10;`);
+        Generator.addCode(`urm10.getDistanceCM(A3, A2)`);
+    }
+    //% block="[LINELR]巡线传感器碰到[LINEWB]" blockType="boolean"
+    //% LINELR.shadow="dropdown" LINELR.options="LINELRL" LINELR.defl="LINELRL.1"
+    //% LINEWB.shadow="dropdown" LINEWB.options="LINEBWL" LINEWB.defl="LINEBWL.1"
+    export function line(parameter: any, block: any) {
+        let linezy = parameter.LINELR.code;
+        let linewb = parameter.LINEWB.code;
+        if(linezy == 3)
+        {
+            if(linewb == 1)
+            {Generator.addCode(`digitalRead(9)==1 && digitalRead(10)==1`);}
+            else
+            {Generator.addCode(`digitalRead(9)==0 && digitalRead(10)==0`);}
+        }
+        else
+        {
+            if(linewb == 1)
+            {Generator.addCode(`digitalRead(${linezy})==1`);}
+            else
+            {Generator.addCode(`digitalRead(${linezy})==0`);}
+        }
+    }
+    //% block="读取红外遥控接收数值" blockType="reporter"
+    export function irget(parameter: any, block: any) {
+        Generator.addInclude('DFRobot_IRremote', '#include <DFRobot_IRremote.h>');
+        Generator.addObject(`DFRobot_IRremote`, `IRremote_Receive`, `remoteReceive_2;`);
+        Generator.addSetup("DFRobot_IRremote.begin", "remoteReceive_2.begin(2);");
+        Generator.addCode(`remoteReceive_2.getIrCommand()`);
+    }  
 }
